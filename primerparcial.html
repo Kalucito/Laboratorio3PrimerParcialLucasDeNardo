@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primer Parcial</title>
+    <style>
+        *{
+            font-family: sans-serif;
+        }
+
+        body{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color:cadetblue;
+        }
+
+        .container {
+            border: solid 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        table{
+            color: #fff;
+            font-size: 14px;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        thead{
+            background-color: rgba(243, 140, 210, 0.4);
+        }
+        
+        th{
+            padding: 20px 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        td{
+            padding: 15px;
+            border-bottom: solid 1px rgba(255, 255, 255, 0.2);
+            border-right: solid 1px rgba(255, 255, 255, 0.2) ;
+        }
+
+        tbody tr:hover{
+            background: rgb(89, 176, 147);
+        }
+
+        .container2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 1rem;
+        }
+
+        .form-row {
+        display: flex;
+        flex-direction: column;
+        }
+
+
+
+
+    </style>
+    <script>
+
+        let stringJson = '[{"id":1, "nombre":"Clark", "apellido":"Kent", "edad":45, "alterego":"Superman", "ciudad":"Metropolis","publicado":2002},{"id":2, "nombre":"Bruce", "apellido":"Wayne", "edad":35, "alterego":"Batman", "ciudad":"Gotica","publicado":2012},{"id":3, "nombre":"Bart", "apellido":"Alen", "edad":30, "alterego":"Flash", "ciudad":"Central","publicado":2017},{"id":4, "nombre":"Lex", "apellido":"Luthor", "edad":18, "enemigo":"Superman", "robos":500,"asesinatos":7},{"id":5, "nombre":"Harvey", "apellido":"Dent", "edad":20, "enemigo":"Batman", "robos":750,"asesinatos":2},{"id":666, "nombre":"Celina", "apellido":"kyle", "edad":23, "enemigo":"Batman", "robos":25,"asesinatos":1}]';
+        let table;
+
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        window.addEventListener('load', ()=>{
+            
+            table = $("tabla");
+
+            //Cargar Tabla Primer Form
+            let tbody = table.createTBody();
+            personas.forEach(persona => {
+            let row = tbody.insertRow();
+            let values = [persona.id, persona.nombre, persona.apellido, persona.edad];
+
+            if (persona instanceof Heroe) 
+            {
+
+                values.push(persona.alterEgo, persona.ciudad, persona.publicado, "", "", "");
+            } 
+            else if (persona instanceof Villano) 
+            {
+                values.push("", "", "", persona.enemigo, persona.robos, persona.asesinatos);
+            }
+            values.forEach(value => {
+                let cell = row.insertCell();
+                let text = document.createTextNode(value);
+                cell.appendChild(text);
+            });
+            });
+
+            //Filtro
+            let select = $("selFiltrar");
+            let cuerpoTabla = table.getElementsByTagName("tbody")[0];
+            let fila;
+
+            select.addEventListener('change', ()=>{
+                for (let i = 0; i < table.rows.length-1; i++) {
+                
+                let fila = cuerpoTabla.getElementsByTagName("tr")[i];
+                let celdas = fila.getElementsByTagName("td");
+
+                switch(select.value)
+                {
+                    case "Heroes":
+                        if(celdas[4].textContent.length == 0)
+                        {
+                            fila.style.display = "none";
+                        }
+                        else{
+                            fila.style.display = "table-row";
+
+                        }
+                        break;
+                    case "Villanos":
+                    if(celdas[4].textContent.length != 0)
+                        {
+                            fila.style.display = "none";
+                        }
+                        else{
+                            fila.style.display = "table-row";
+                        }
+                        break;
+                    default:
+                        fila.style.display = "table-row";
+                        break;
+                }
+                
+            }
+
+            
+
+    
+            })
+
+
+            btnCalcular = $("btnCalcular");
+            let edades = [];
+            btnCalcular.addEventListener('click', ()=>{
+
+                for (let i = 0; i < table.rows.length-1; i++) {
+                
+                let fila = cuerpoTabla.getElementsByTagName("tr")[i];
+                let celdas = fila.getElementsByTagName("td");
+                edades.push(parseInt(celdas[3].textContent)); 
+                
+                }
+
+            $("edadPromedio").value = (edades.reduce((acumulado, actual) => acumulado + actual) / (table.rows.length-1));
+        });
+        });
+
+        //CLASES
+        class Persona{
+            constructor(id, nombre, apellido, edad)
+            {
+                this.id = id;
+                this.nombre = nombre;
+                this.apellido = apellido;
+                this.edad = edad;
+            }
+        }
+
+        class Heroe extends Persona{
+            constructor(id, nombre, apellido, edad, alterEgo, ciudad, publicado)
+            {
+                super(id, nombre, apellido, edad, alterEgo);
+                this.alterEgo = alterEgo;
+                this.ciudad = ciudad;
+                this.publicado = publicado;
+            }
+        }
+
+        class Villano extends Persona{
+            constructor(id, nombre, apellido, edad, enemigo, robos, asesinatos)
+            {
+                super(id, nombre, apellido, edad);
+                this.enemigo = enemigo;
+                this.robos = robos;
+                this.asesinatos = asesinatos;
+            }
+        }
+
+        //LOGICA
+        let arrayJson = JSON.parse(stringJson);
+
+        let personas = [];
+
+        arrayJson.forEach(element => {
+             if(element.alterego !== undefined)
+             {
+                let heroe = new Heroe(element.id, element.nombre, element.apellido, element.edad, element.alterego, element.ciudad, element.publicado);
+               
+                personas.push(heroe);
+             }
+             else{
+                let villano = new Villano(element.id, element.nombre, element.apellido, element.edad, element.enemigo, element.robos, element.asesinatos);
+                
+                personas.push(villano);
+             }
+        });
+
+
+
+        
+
+        
+
+
+
+    </script>
+</head>
+<body>
+    <div class="container" id="primerForm">
+
+        <h1>Form Datos</h1>
+        <label>Filtrar Por :
+            <Select id="selFiltrar">
+                <option value="Todos">Todos</option>
+                <option value="Heroes">Heroes</option>
+                <option value="Villanos">Villanos</option>
+            </Select>
+        </label>
+        <br>
+        <label>Calcular Edad Promedio:</label>
+        <input type="text" id="edadPromedio" readonly>
+        <button id="btnCalcular">Calcular</button>
+        <br>
+        <Label>Mostrar Columnas:</Label>
+        <div>    
+            <label for="cbxId">Id<input type="checkbox" name="id" id="cbxId"></label>
+            <label for="cbxNombre">Nombre<input type="checkbox" name="nombre" id="cbxNombre"></label>
+            <label for="cbxApellido">Apellido<input type="checkbox" name="apellido" id="cbxApellido"></label>
+            <label for="cbxEdad">Edad<input type="checkbox" name="edad" id="cbxEdad"></label>
+            <label for="cbxAlterEgo">AlterEgo<input type="checkbox" name="alterEgo" id="cbxAlterEgo"></label>
+            <label for="cbxCiudad">Ciudad<input type="checkbox" name="ciudad" id="cbxCiudad"></label>
+            <label for="cbxPublicado">Publicado<input type="checkbox" name="publicado" id="cbxPublicado"></label>
+            <label for="cbxEnemigo">Enemigo<input type="checkbox" name="enemigo" id="cbxEnemigo"></label>
+            <label for="cbxRobos">Robos<input type="checkbox" name="robos" id="cbxRobos"></label>
+            <label for="cbxAsesinatos">Asesinatos<input type="checkbox" name="asesinatos" id="cbxAsesinatos"></label>
+        </div>
+    
+        <table id="tabla">
+            <thead>
+                <tr>
+                    <th >Id</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Edad</th>
+                    <th>AlterEgo</th>
+                    <th>Ciudad</th>
+                    <th>Publicado</th>
+                    <th>Enemigo</th>
+                    <th>Robos</th>
+                    <th>Asesinatos</th>
+                </tr>
+            </thead>
+        </table>
+        
+        <button id="btnAgregar">Agregar</button>
+        
+        <div class="container2" id="segundoForm">
+            <div>
+                <h2>Formulario ABM</h2>
+                
+            </div>
+            
+            <div class="form-row">
+                <label >Id:<input type="text" id="txtId" readonly></label>
+            </div>
+            <div class="form-row">
+                <label>Nombre:<input type="text" id="txtNombre" ></label>
+            </div>
+            <div class="form-row">
+                <label>Apellido:<input type="text" id="txtApellido" ></label>
+            </div>
+            <div class="form-row">
+                <label >Edad:<input type="text" id="txtEdad" ></label>
+            </div>
+            <div class="form-row">
+                <label>Tipo:
+                    <Select>
+                        <option value="Heroes">Heroes</option>
+                        <option value="Villanos">Villanos</option>
+                    </Select>
+                </label>
+            </div>
+            <div class="form-row">
+                <label >AlterEgo:<input type="text" id="txtAlterEgo" ></label>
+            </div>
+            <div class="form-row">
+                <label >Ciudad:<input type="text" id="txtCiudad" ></label>
+            </div>
+            <div class="form-row">
+                <label >Publicado:<input type="text" id="txtPublicado" ></label>
+            </div>
+            <div class="form-row">
+                <label >Enemigo:<input type="text" id="txtEnemigo" ></label>
+            </div>
+            <div class="form-row">
+                <label >Robos:<input type="text" id="txtRobos" ></label>
+            </div>
+            <div class="form-row">
+                <label >Asesinatos:<input type="text" id="txtAsesinatos" ></label>
+            </div>
+            
+            <button>Alta</button>
+            <button>Modificar</button>
+            <button>Eliminar</button>
+            <button>Cancelar</button>
+            
+            
+            
+        </div>
+        
+    </div>
+        
+    </body>
+    </html>
